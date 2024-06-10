@@ -1,5 +1,3 @@
-import requests
-import json
 from api_tools import open_db, get_clan_members
 import sqlite3
 

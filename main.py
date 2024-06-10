@@ -2,16 +2,18 @@ from tools import flatten, ProgressBar
 from tools.logger import Logger
 from api_tools import get_player, open_db
 from datetime import datetime
+from time import sleep
+from _tools import RecurringTasks
+
+
 # from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = Logger("logs.log")
 
-def main():
+def get_contributions():
 	with open_db() as (db, connection):
 		tags: list[str] = flatten(db.execute("select tag from member_contributions").fetchall())
 
-		progress = ProgressBar(total=len(tags))
-		progress.init()
 		# with ThreadPoolExecutor(max_workers=25) as pool:
 		# 	results = [pool.submit(get_player, tag) for tag in tags]
 
@@ -49,19 +51,11 @@ def main():
 					logger.info(f"{name} contributed {new_contribution - old_contribution}")
 
 				connection.commit()
-				progress.increment()
 
-		progress.clear_line()
 
-from time import sleep
+rt = RecurringTasks()
+rt.add_task(get_contributions, 60 * 5, "Contributions")
+# rt.add_task(get_contributions, 60 * 5, "Contributions")
+rt.start()
 
-BUFFER = 60 * 5
-if __name__ == "__main__":
-	while True:
-		main()
-		for i in range(1, BUFFER + 1):
-			print(f"\rRefreshing in {BUFFER - i} seconds", end="\r")
-			sleep(1)
-
-		logger.info("Refreshing contributions")
 

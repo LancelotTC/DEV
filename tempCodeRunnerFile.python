@@ -1,0 +1,48 @@
+import attrs
+
+from typing import Optional
+
+
+@attrs.define
+class Member:
+	tag: str
+	name: str
+	townhall_level: Optional[int] = None
+	map_position: Optional[int] = None
+	total_stars: Optional[int] = None
+	total_attacks: Optional[int] = None
+	total_chances: Optional[int] = None
+	total_destruction: Optional[int] = None
+
+	@property
+	def activity_rate(self):
+		return self.total_attacks/self.total_chances
+
+
+def g(couple: tuple[int, int]):
+	identity = (0, 0)
+
+	try:
+		attack_diff = couple[0]/identity[0]
+	except ZeroDivisionError:
+		attack_diff = 0
+
+	try:
+		activity_rate2 = identity[0]/identity[1]
+	except ZeroDivisionError:
+		activity_rate2 = 0
+
+	try:
+		activity_rate1 = couple[0]/couple[1]
+	except ZeroDivisionError:
+		activity_rate1 = 0
+
+	score = 1.015873 * couple[0] * (attack_diff - activity_rate2 + activity_rate1)
+	return score
+
+m1 = Member(tag='#2L9R8JP9L', name='asesino_1233', townhall_level=10, map_position=12, total_stars=18, total_attacks=7, total_chances=7, total_destruction=588)
+m2 = Member(tag='#YYC8Q90CV', name='Venom750', townhall_level=10, map_position=13, total_stars=19, total_attacks=7, total_chances=7, total_destruction=664)
+
+lst = [m1, m2]
+
+print(sorted(lst, key=lambda m:(g((m.total_attacks, m.total_chances)), -m.total_stars)))

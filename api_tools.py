@@ -1,9 +1,7 @@
-import requests
+import requests, inspect, os, asyncio, aiohttp, json, sqlite3
+
 from aiohttp.client_exceptions import ClientOSError, ServerDisconnectedError
 
-import aiohttp
-import json
-import sqlite3
 from contextlib import contextmanager
 from time import sleep
 from typing import Any, Sequence, Mapping, Callable
@@ -12,21 +10,24 @@ from collections.abc import Iterable
 from logging import Logger as _Logger, DEBUG, FileHandler, Formatter
 from typing import Optional
 from pathlib import Path
-import inspect
-import os
-import asyncio
 
+from _tools import overload
 
 def get_key():
 	with open("./api_key.txt", "r") as file:
 		return file.readline().strip()
 
+@overload
 def _api_request(tag: str, obj: str, suffix: str="") -> dict:
 	tag = tag.replace("#", "")
+	return _api_request(f"{obj}/%23{tag}/{suffix}")
+
+@overload
+def _api_request(args: str) -> dict:
 	while True:
 		try:
 			response = requests.get(
-				f"https://api.clashofclans.com/v1/{obj}/%23{tag}/{suffix}",
+				f"https://api.clashofclans.com/v1/{args}",
 				# f"https://af8cc933-3f4c-4bbc-9e27-cd1d204d736d.mock.pstmn.io/v1/{obj}/%23{tag}/{suffix}",
 				headers={"Authorization": f"Bearer {get_key()}"}
 			)
